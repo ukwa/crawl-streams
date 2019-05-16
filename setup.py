@@ -21,7 +21,8 @@ setup(
     entry_points={
         'console_scripts': [
             'submit=crawlstreams.submit:main',
-            'crawlstreams=crawlstreams.report:main'
+            'crawlstreams=crawlstreams.report:main',
+            'analyse=crawlstreams.analysis:main'
         ]
     }
 )
