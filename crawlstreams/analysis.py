@@ -227,7 +227,7 @@ def main():
         # Write to temp file:
         temp_name = "%s.tmp" % args.output
         with open(temp_name, 'w') as outfile:
-            json.dump(stats, outfile)
+            json.dump(stats, outfile, indent=2)
         # Atomic replace:
         os.rename(temp_name, args.output)
 
