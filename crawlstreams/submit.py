@@ -44,7 +44,7 @@ def sender(launcher, args, uri):
         uri = "http://%s" % uri
 
     # Add the main URL
-    launcher.launch("h3", uri, args.source, isSeed=args.seed, forceFetch=args.forceFetch,
+    launcher.launch(uri, args.source, isSeed=args.seed, forceFetch=args.forceFetch,
                     recrawl_interval=args.recrawl_interval, sheets=args.sheets, reset_quotas=args.reset_quotas,
                     webrender_this=args.webrender_this, launch_ts=args.launch_ts)
 
