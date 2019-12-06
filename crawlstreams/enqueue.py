@@ -54,7 +54,7 @@ class KafkaLauncher(object):
         self.producer.send(topic, key=key, value=message)
 
     def launch(self, uri, source, isSeed=False, forceFetch=False, sheets=[], hop="",
-               recrawl_interval=None, reset_quotas=None, webrender_this=False, launch_ts=None, inherit_launch_ts=True):
+               recrawl_interval=None, reset_quotas=None, webrender_this=False, launch_ts=None, inherit_launch_ts=False):
 
         # Set up a launch timestamp:
         if launch_ts:
@@ -76,8 +76,9 @@ class KafkaLauncher(object):
         curim['parentUrlMetadata'] = {}
         curim['parentUrlMetadata']['pathFromSeed'] = ""
         curim['parentUrlMetadata']['heritableData'] = {}
+        curim['parentUrlMetadata']['heritableData']['refreshDepth'] = 1
         curim['parentUrlMetadata']['heritableData']['source'] = source
-        curim['parentUrlMetadata']['heritableData']['heritable'] = ['source', 'heritable']
+        curim['parentUrlMetadata']['heritableData']['heritable'] = ['source', 'heritable', 'refreshDepth']
         curim['parentUrlMetadata']['heritableData']['annotations'] = []
         curim['isSeed'] = isSeed
         if not isSeed:
@@ -112,3 +113,6 @@ class KafkaLauncher(object):
 
     def flush(self):
         self.producer.flush()
+
+    def close(self):
+        self.producer.close()
