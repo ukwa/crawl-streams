@@ -46,7 +46,7 @@ def sender(launcher, args, uri):
     # Add the main URL
     launcher.launch(uri, args.source, isSeed=args.seed, forceFetch=args.forceFetch,
                     recrawl_interval=args.recrawl_interval, sheets=args.sheets, reset_quotas=args.reset_quotas,
-                    webrender_this=args.webrender_this, launch_ts=args.launch_ts)
+                    webrender_this=args.webrender_this, launch_ts=args.launch_ts, parallel_queues=args.parallel_queues)
 
 
 def main(argv=None):
@@ -61,6 +61,8 @@ def main(argv=None):
                         help="Treat supplied URI as a seed, thus widening crawl scope. [default: %(default)s]")
     parser.add_argument("-F", "--force-fetch", dest="forceFetch", action="store_true", default=False, required=False,
                         help="Force the URL to be fetched, even if already seen and queued/rejected. [default: %(default)s]")
+    parser.add_argument("-p", "--parallel-queues", dest="parallel_queues", default=1, required=False, type=int,
+                        help="Number of parallel queues that should be used for this SURT. [default: %(default)s]")
     parser.add_argument("-P", "--pager", dest="pager", action="store_true", default=False, required=False,
                         help=argparse.SUPPRESS ) #"Attempt to extract URLs for all pages, and submit those too.")
     parser.add_argument("-r", "--recrawl-interval", dest="recrawl_interval", default=None, required=False, type=int,
