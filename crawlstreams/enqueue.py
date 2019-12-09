@@ -81,8 +81,7 @@ class KafkaLauncher(object):
         curim['parentUrlMetadata']['heritableData']['heritable'] = ['source', 'heritable', 'refreshDepth']
         curim['parentUrlMetadata']['heritableData']['annotations'] = []
         curim['isSeed'] = isSeed
-        if not isSeed:
-            curim['forceFetch'] = forceFetch
+        curim['forceFetch'] = forceFetch # Even seeds might need this, depending on uriUniqFilter configuration.
         curim['url'] = uri
         curim['hop'] = hop
         if len(sheets) > 0:
