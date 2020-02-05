@@ -173,24 +173,28 @@ class CrawlLogConsumer(Thread):
         }
 
     def run(self):
-        # Set up a consumer:
-        up = False
-        while not up:
-            try:
-                self.consumer = KafkaConsumer(self.kafka_topic, bootstrap_servers=self.kafka_brokers, group_id=self.group_id)
-                # If requested, start at the start:
-                if self.from_beginning and self.from_beginning.lower() == 'true':
-                    logger.info("Seeking to the beginning of %s" % self.kafka_topic)
-                    self.consumer.poll(timeout_ms=5000)
-                    self.consumer.seek_to_beginning()
-                up = True
-            except Exception as e:
-                logger.exception("Failed to start CrawlLogConsumer!")
-                time.sleep(5)
+        # Try to run forever...
+        while True:
+            # Set up a consumer:
+            up = False
+            while not up:
+                try:
+                    self.consumer = KafkaConsumer(self.kafka_topic, bootstrap_servers=self.kafka_brokers, group_id=self.group_id)
+                    # If requested, start at the start:
+                    if self.from_beginning and self.from_beginning.lower() == 'true':
+                        logger.info("Seeking to the beginning of %s" % self.kafka_topic)
+                        self.consumer.poll(timeout_ms=5000)
+                        self.consumer.seek_to_beginning()
+                    up = True
+                except Exception as e:
+                    logger.exception("Failed to start CrawlLogConsumer!")
+                    time.sleep(5)
 
-        # And consume...
-        for message in self.consumer:
-            self.process_message(message)
+            # And consume...
+            for message in self.consumer:
+                self.process_message(message)
+
+            logger.warning("Stopped consuming messages.")
 
 
 def main():
@@ -223,7 +227,7 @@ def main():
     while True:
         time.sleep(args.update_interval)
         stats = consumer.get_stats()
-        print("Updating %s last timestamp %s" % (args.output, stats.get('last_timestamp', None)))
+        ##logger.debug("Updating %s last timestamp %s" % (args.output, stats.get('last_timestamp', None)))
         # Write to temp file:
         temp_name = "%s.tmp" % args.output
         with open(temp_name, 'w') as outfile:
