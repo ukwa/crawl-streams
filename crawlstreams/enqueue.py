@@ -108,6 +108,7 @@ class KafkaLauncher(object):
         if parallel_queues > 1:
             target_sheet['queueAssignmentPolicy.parallelQueues'] = parallel_queues
             target_sheet['queueAssignmentPolicy.parallelQueuesRandomAssignment'] = True
+            target_sheet['queueAssignmentPolicy.deferToPrevious'] = False
 
         # Patch in the target-level sheet if it's been used:
         if len(target_sheet) > 0:
