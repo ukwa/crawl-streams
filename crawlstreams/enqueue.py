@@ -55,7 +55,7 @@ class KafkaLauncher(object):
 
     def launch(self, uri, source, isSeed=False, forceFetch=False, sheets=[], hop="",
                recrawl_interval=None, reset_quotas=None, webrender_this=False, launch_ts=None, inherit_launch_ts=False,
-               parallel_queues=1):
+               parallel_queues=1, refresh_depth=1):
 
         # Set up a launch timestamp:
         if launch_ts:
@@ -78,7 +78,7 @@ class KafkaLauncher(object):
         curim['parentUrlMetadata'] = {}
         curim['parentUrlMetadata']['pathFromSeed'] = ""
         curim['parentUrlMetadata']['heritableData'] = {}
-        curim['parentUrlMetadata']['heritableData']['refreshDepth'] = 1
+        curim['parentUrlMetadata']['heritableData']['refreshDepth'] = refresh_depth # setLaunchTimestampInheritance
         curim['parentUrlMetadata']['heritableData']['source'] = source
         curim['parentUrlMetadata']['heritableData']['heritable'] = ['source', 'heritable', 'refreshDepth']
         curim['parentUrlMetadata']['heritableData']['annotations'] = []
@@ -95,14 +95,19 @@ class KafkaLauncher(object):
         if reset_quotas:
             curim['parentUrlMetadata']['heritableData']['annotations'].append('resetQuotas')
         if launch_ts:
+            # Set up the launch timestamp, inheritable via a sheet, or just via CrawlURI data:
             if inherit_launch_ts:
                 # Define a Heritrix crawl configuration sheet specific to this target:
                 target_sheet['recentlySeen.launchTimestamp'] = launch_ts
             else:
-                # Just specify it for this URL:
+                # Specify it for this URL (only inherit to refresh_depth):
                 curim['parentUrlMetadata']['heritableData']['launchTimestamp'] = launch_ts # New syntax
                 curim['parentUrlMetadata']['heritableData']['launch_ts'] = launch_ts
+                # n.b. This _always_ inherits the launch_ts, which is not what we want:
                 #curim['parentUrlMetadata']['heritableData']['heritable'].append('launch_ts')
+
+            # Also add the launch_ts as an annotation, just to make it easier to track launches:
+            curim['parentUrlMetadata']['heritableData']['annotations'].append('launchTimestamp:%s' % launch_ts )
 
         # Support launching URLs with parallel queues
         if parallel_queues > 1:
