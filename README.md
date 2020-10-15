@@ -10,7 +10,7 @@ You'll need Snappy and build tools. e.g. for RHEL/CentOS:
 
 ```
 sudo yum install snappy-devel
-sudo yum install gcc gcc-c++ libtool # Maybe this <<<
+sudo yum install gcc gcc-c++ libtool
 ```
 
 With these in place, this should work:
