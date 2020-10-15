@@ -8,7 +8,7 @@ Tools for operating on the event streams relating to our crawler activity.
 
 You'll need Snappy and build tools. e.g. for RHEL/CentOS:
 
-``
+```
 sudo yum install snappy-devel
 sudo yum install gcc gcc-c++ libtool # Maybe this <<<
 ```
