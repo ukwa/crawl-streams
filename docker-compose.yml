@@ -2,7 +2,11 @@ version: '2'
 
 services:
   crawlstreams:
-    build: .
+    build:
+      context: .
+      args:
+        http_proxy: ${HTTP_PROXY}
+        https_proxy: ${HTTPS_PROXY}
     environment:
       - "CDX_SERVER=http://cdxserver:8080/tc"
       - "WAYBACK_SERVER=http://pywb:8080/test/"
