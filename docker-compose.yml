@@ -29,29 +29,48 @@ services:
 
   # Kafka
   kafka:
-    image: wurstmeister/kafka:1.1.0
+    image: wurstmeister/kafka:2.12-2.1.0
     ports:
-      - "9092:9092"
+      - "9094:9094"
     environment:
-      KAFKA_ADVERTISED_HOST_NAME: kafka
+      HOSTNAME_COMMAND: "docker info | grep ^Name: | cut -d' ' -f 2"
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_LISTENERS: PLAINTEXT://:9092
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,OUTSIDE:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://:9092,OUTSIDE://_{HOSTNAME_COMMAND}:9094
+      KAFKA_LISTENERS: PLAINTEXT://:9092,OUTSIDE://:9094
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_NUM_RECOVERY_THREADS_PER_DATA_DIR: 10
-      LOG_RETENTION_HOURS: -1
-      LOG_RETENTION_BYTES: -1
-      NUM_PARTITIONS: 16
-      KAFKA_CREATE_TOPICS: "uris.candidates.fc:16:1 --config=compression.type=snappy,uris.tocrawl.fc:16:1 --config=compression.type=snappy,uris.crawled.fc:16:1 --config=compression.type=snappy,uris.discarded.fc:16:1 --config=compression.type=snappy"
+      KAFKA_LOG_RETENTION_HOURS: -1
+      KAFKA_LOG_RETENTION_BYTES: -1
+      KAFKA_NUM_PARTITIONS: 4
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'false'
       LOG4J_LOGGER_KAFKA: WARN
+      KAFKA_CREATE_TOPICS: "fc.tocrawl.npld:16:1,fc.tocrawl.bypm:16:1,fc.crawled:16:1"
+      # persistent files are in consistent locations, each server supplies a /kafka folder.
+      KAFKA_BROKER_ID: 1
+      KAFKA_LOG_DIRS: /kafka/kafka-logs/kafka-logs-broker-1
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./kafka:/kafka
     depends_on:
       - zookeeper
+
+
+  # Kafka UI
+  ui:
+    image: ukwa/docker-trifecta
+    ports:
+      - "9990:9000"
+    environment:
+      - "ZK_HOST=zookeeper:2181"
+    depends_on:
+      - zookeeper
+      - kafka
+
 
   # Needs a Zookeeper too
   # ----
   zookeeper:
-    image: wurstmeister/zookeeper
+    image: zookeeper:3.4
     ports:
      - "2181:2181"
