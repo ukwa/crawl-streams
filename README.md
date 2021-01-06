@@ -46,7 +46,7 @@ At which point you should be able to visit port 9990 (e.g. http://dev1.n45.wa.bl
 You should now be able to edit the Python source files and run them to test against the given Kafka service. For example, to submit a URL to the NPLD frequent crawl's to-crawl topic, you can run:
 
 ```
-$ python -m crawlstreams.submit -k dev1:9094 fc.tocrawle.npld http://a-test-string.com
+$ python -m crawlstreams.submit -k dev1:9094 fc.tocrawl.npld http://a-test-string.com
 ```
 
 To run the reporting script to analyse the contents of the `fc.crawled` topic, you use:
