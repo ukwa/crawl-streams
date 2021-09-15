@@ -22,7 +22,8 @@ setup(
         'console_scripts': [
             'submit=crawlstreams.submit:main',
             'crawlstreams=crawlstreams.report:main',
-            'analyse=crawlstreams.analysis:main'
+            'analyse=crawlstreams.analysis:main',
+            'launcher=crawlstreams.launcher:main',
         ]
     }
 )

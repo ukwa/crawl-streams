@@ -71,3 +71,9 @@ When performing read operations, it's fine to run against the live system. e.g. 
 $  python -m crawlstreams.report -k crawler05.n45.bl.uk:9094 -t -1 -q fc.crawled -r | head
 ```
 
+### Running inside Docker
+
+TBA
+
+    $ docker-compose build
+    $ docker-compose run crawlstreams -k kafka:9092 ...

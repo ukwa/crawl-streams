@@ -39,6 +39,7 @@ class KafkaLauncher(object):
         '''
         self.producer = KafkaProducer(
             bootstrap_servers=kafka_server,
+            acks='all', # Ensure messages are committed before returning
             value_serializer=lambda v: json.dumps(v).encode('utf-8'))
         self.topic = topic
 

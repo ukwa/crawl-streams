@@ -3,7 +3,9 @@ from urllib.parse import urlparse
 import json
 import argparse
 import logging
+import datetime
 from kafka import KafkaConsumer
+from kevals.solr import SolrKevalsDB
 
 # Set up a logging handler:
 handler = logging.StreamHandler()
@@ -103,6 +105,66 @@ def summarise_stream(consumer, max_messages=None):
     for host in tot:
         print("%s\t%s\t%i" %(host, tot[host].get('via', '-'), tot[host]['tot']))
 
+def to_solr_kevals(consumer, max_messages=None):
+
+    skvdb = SolrKevalsDB('http://localhost:8913/solr/crawl_log_fc')
+ 
+    def gen(consumer):
+        for message in consumer:
+            j = json.loads(message.value.decode('utf-8'))
+            # Rename timestamp field
+            j['log_timestamp'] = j.pop('timestamp')
+            # Build ID based on timestamp and URL:
+            j['id'] = 'crawl-log:%s/%s' % ( j['log_timestamp'], j['url'] )
+            # Rename seed to source:
+            if 'seed' in j:
+                j['source'] = j.pop('seed')
+            # Annotations, turing into fields as needed:
+            annots = j.pop('annotations', '').split(',')
+            new_annots = []
+            for annot in annots:
+                if annot.startswith('ip:'):
+                    j['ip'] = annot[3:]
+                elif annot.startswith('launchTimestamp:'):
+                    # Map to launch_timestamp
+                    ltss = annot[16:]
+                    lts = datetime.datetime.strptime(ltss, '%Y%m%d%H%M%S%f')
+                    j['launch_timestamp'] = "%sZ" % lts.isoformat()
+                elif annot.startswith('dol:'):
+                    j['dol'] = annot[4:]
+                elif annot == "":
+                    pass
+                else:
+                    # Replace any spaces with _ so the annotations are not split by Solr:
+                    annot = annot.replace(' ', '_')
+                    new_annots.append(annot)
+            if len(new_annots) > 0:
+                j['annotations'] = " ".join(new_annots)
+            # start_time_plus_duration to start_time and duration:
+            if 'start_time_plus_duration' in j:
+                if j['start_time_plus_duration'] and '+' in j['start_time_plus_duration']:
+                    jst, j['duration'] = j['start_time_plus_duration'].split('+')
+                    jst = datetime.datetime.strptime(jst, '%Y%m%d%H%M%S%f')
+                    j['start_time'] = "%sZ" % jst.isoformat()
+                else:
+                    j.pop('start_time_plus_duration')
+
+            # Drop extra_info for now:
+            j.pop('extra_info', None)
+
+            # Add the crawler if not set:
+            if 'crawler' not in j:
+                if 'thread' in j:
+                    j['crawler'] = 'Heritrix'
+                else:
+                    j['crawler'] = 'WebRender'
+
+            # Pass to indexer:
+            yield j
+    
+    skvdb.import_items_from(gen(consumer))
+    
+
 
 def main(argv=None):
     parser = argparse.ArgumentParser('(Re)Launch URIs into crawl queues.')
@@ -120,6 +182,10 @@ def main(argv=None):
                         help="Show raw queue contents rather than re-formatting. [default: %(default)s]")
     parser.add_argument("-q", "--queue", dest="queue", default="uris.crawled.fc", required=False,
                         help="Name of queue to inspect. [default: %(default)s]")
+    parser.add_argument("-G", "--group_id", dest="group_id", default=None, required=False,
+                        help="Group ID to use. Setting this enables offset tracking. [default: %(default)s]")
+    parser.add_argument("-C", "--client_id", dest="client_id", default="CrawlStreamsReport", required=False,
+                        help="Client ID to use. [default: %(default)s]")
 
     # Parse the args:
     args = parser.parse_args()
@@ -139,7 +205,9 @@ def main(argv=None):
                              bootstrap_servers=args.bootstrap_server,
                              consumer_timeout_ms=args.timeout,
                              max_partition_fetch_bytes=128*1024,
-                             enable_auto_commit=False)
+                             enable_auto_commit=False,
+                             group_id=args.group_id,
+                             client_id=args.client_id)
 
     # Choose what kind of analysis:
     if args.summarise:
@@ -147,7 +215,8 @@ def main(argv=None):
     elif args.raw:
         show_raw_stream(consumer, max_messages=args.max_messages)
     else:
-        show_stream(consumer, max_messages=args.max_messages)
+        to_solr_kevals(consumer, max_messages=args.max_messages)
+        #show_stream(consumer, max_messages=args.max_messages)
 
 
 if __name__ == "__main__":
