@@ -196,6 +196,10 @@ class Launcher():
                 if 'twitter.com' in seed:
                     parallel_queues = 2
 
+                # Allow the crawler to go real fast (commented out until approved by web owners):
+                #if 'legislation.gov.uk' in seed:
+                #    sheets.append('fast-10ps')
+
                 # And send launch message, always resetting any crawl quotas:
                 self.launcher.launch(seed, source, isSeed, forceFetch=True, sheets=sheets, 
                     reset_quotas=True, launch_ts=launch_timestamp, 
