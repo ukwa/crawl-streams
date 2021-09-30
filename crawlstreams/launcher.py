@@ -44,7 +44,6 @@ class Launcher():
 
         # Get current time
         if not now or now == 'now':
-            #now = datetime.now(tz=timezone.utc)
             now = datetime.now()
         logger.debug("Now timestamp: %s" % str(now))
 
@@ -216,7 +215,7 @@ def main(argv=None):
     parser.add_argument('-k', '--kafka-bootstrap-server', dest='kafka_server', type=str, default="localhost:9092",
                         help="Kafka bootstrap server(s) to use [default: %(default)s]")
     parser.add_argument("-L", "--launch-datetime", dest="launch_dt", default='now', required=False, type=str,
-                        help="Launch request datetime e.g. '2019-03-01T12:00:00Z' or use 'now' to use the current time. [default: %(default)s]")
+                        help="Launch request datetime e.g. '2019-03-01T12:00:00' or use 'now' to use the current time. [default: %(default)s]")
     parser.add_argument('queue', help="Name of queue to send URIs too, e.g. 'fc.tocrawl.npld'.")
     parser.add_argument('crawl_feed_file', help="Crawl feed file, containing crawl job definitions.")
 
