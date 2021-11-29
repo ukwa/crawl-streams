@@ -37,6 +37,65 @@ def show_raw_stream(consumer, max_messages=None):
                                               message.value))
 
 
+def show_crawl_log_stream(consumer, max_messages=None):
+    msg_count = 0
+    for message in consumer:
+        # message value and key are raw bytes -- decode if necessary!
+        # e.g., for unicode: `message.value.decode('utf-8')`
+        j = json.loads(message.value.decode('utf-8'))
+
+        # Only include Heritrix entries, which have a 'thread' key:
+        if not 'thread' in j:
+            continue
+
+        #print(message.value.decode('utf-8'))
+        # Swap nulls for "-
+        for k in j:
+            if j[k] == None:
+                j[k] = "-"
+
+        print( "%(timestamp)s %(status_code)6s %(size)10s %(url)s %(hop_path)s %(via)s %(mimetype)s #%(thread)s %(start_time_plus_duration)s %(content_digest)s %(seed)s %(annotations)s" % j)
+
+        # Counter:
+        msg_count += 1
+        if max_messages and msg_count > max_messages:
+            break
+
+#fc.crawled:12:789312368: key=b'8277dd30' value=b'{
+# "hop_path":"LLLLEL",
+# "status_code":200,
+# "seed":"tid:2984:http://www.amazon.co.uk/",
+# "warc_filename":null,
+# "annotations":"ip:88.221.17.43",
+# "thread":89,
+# "content_digest":"sha1:FHBVUYL3GYHTULO6XZZCD4RGBXHYSTSL",
+# "url":"https://www.amazon.co.uk/blackfriday/?_encoding=UTF8&ref_=nav_swm_
+# Black%20Friday%20Week&pf_rd_p=8404b3b4-a3be-4834-9991-51c086b2707f&pf_rd_s=nav-sitewide-msg&pf_r
+# d_t=4201&pf_rd_i=navbar-4201&pf_rd_m=A1F83G8C2ARO7P&pf_rd_r=7DY4PT66GSJRPGZCATKY",
+# "via":"https://www.amazon.co.uk/stores/DOWNTONINTERIORS/Homepage/page/755D6534-DB5E-410C-BD83-EB8327EDB40E",
+# "warc_offset":null,
+# "crawl_name":"frequent-npld",
+# "start_time_plus_duration":"20211119173745708+342",
+# "extra_info":{"scopeDecision":"ACCEPT by rule #1 WatchedFileSurtPrefixedDecideRule"},
+# "size":79899,"host":"www.amazon.co.uk","mimetype":"text/html","content_length":79355,"timestamp":"2021-11-19T17:37:46.281Z"}'
+
+
+# 2021-11-17T13:01:54.481Z   
+# 200      
+# 77071 
+# https://www.visitscotland.com/es-es/user/loginredirect?returnurl=/fr-fr/user/loginredirect?returnurl=/fr-fr/info/events/nevis-ensemble-p2581811 
+# LLLLLL 
+# https://www.visitscotland.com/fr-fr/user/loginredirect?returnurl=/fr-fr/user/loginredirect?returnurl=/fr-fr/info/events/nevis-ensemble-p2581811 
+# text/html 
+# #051 
+# 20211117130150371+447 
+# sha1:XMLUE5YLR7JNLQCAOSM2UQNBN6LVIYME 
+# tid:3195:http://www.visitscotland.com/ 
+# ip:81.139.49.73 
+# {"contentSize":77469,"warcFilename":"BL-NPLD-20211117124944924-08807-80~npld-heritrix3-worker-1~8443.warc.gz","warcFileOffset":678399865,"scopeDecision":"ACCEPT by rule #1 WatchedFileSurtPrefixedDecideRule","warcFileRecordLength":15300}
+
+
+
 def show_stream(consumer, max_messages=None):
     msg_count = 0
     for message in consumer:
@@ -178,8 +237,7 @@ def main(argv=None):
                         help="Maximum number of messages to process. [default: %(default)s]")
     parser.add_argument("-t", "--timeout", dest="timeout", default=10, required=False, type=int,
                         help="Seconds to wait for more messages before timing-out. '-1' for 'never'. [default: %(default)s]")
-    parser.add_argument("-r", "--raw", dest="raw", action="store_true", default=False, required=False,
-                        help="Show raw queue contents rather than re-formatting. [default: %(default)s]")
+    parser.add_argument("-F", "--format", choices=['jsonl', 'raw', 'crawl-db', 'crawl-log'], help='How to output queue content.', default='jsonl')
     parser.add_argument("-q", "--queue", dest="queue", default="uris.crawled.fc", required=False,
                         help="Name of queue to inspect. [default: %(default)s]")
     parser.add_argument("-G", "--group_id", dest="group_id", default=None, required=False,
@@ -212,11 +270,15 @@ def main(argv=None):
     # Choose what kind of analysis:
     if args.summarise:
         summarise_stream(consumer, max_messages=args.max_messages)
-    elif args.raw:
-        show_raw_stream(consumer, max_messages=args.max_messages)
     else:
-        to_solr_kevals(consumer, max_messages=args.max_messages)
-        #show_stream(consumer, max_messages=args.max_messages)
+        if args.format == 'raw':
+            show_raw_stream(consumer, max_messages=args.max_messages)
+        elif args.format == 'crawl-log':
+            show_crawl_log_stream(consumer, max_messages=args.max_messages)
+        elif args.format == 'crawl-db':
+            to_solr_kevals(consumer, max_messages=args.max_messages)
+        else:
+            show_stream(consumer, max_messages=args.max_messages)
 
 
 if __name__ == "__main__":
