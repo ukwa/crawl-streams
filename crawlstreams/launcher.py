@@ -227,6 +227,8 @@ def main(argv=None):
     # Set the launch timestamp:
     if args.launch_dt != 'now':
         launch_datetime = datetime.fromisoformat(args.launch_dt)
+        # Force it to be timezone naive:
+        launch_datetime = launch_datetime.replace(tzinfo=None)
     else:
         launch_datetime = 'now'
 
