@@ -1,4 +1,4 @@
-FROM python:3.6-slim
+FROM python:3.7-slim
 
 # Additional dependencies required to support Snappy compression:
 RUN apt-get update && apt-get install -y --no-install-recommends \
