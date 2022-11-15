@@ -159,8 +159,7 @@ def generate_crawl_stream(
                 else:
                     yield CrawlLogEntry(msg)
             except Exception as e:
-                print("Could not parse %s" % msg.value)
-                print(e)
+                logger.exception("Could not parse %s" % msg.value, e)
         if len(oos) == len(tps):
             break
 
@@ -169,16 +168,17 @@ def generate_crawl_stream(
 def main(argv=None):
     parser = argparse.ArgumentParser('Pull and filter records from crawl streams in Kafka.')
     parser.add_argument('-k', '--kafka-bootstrap-server', dest='bootstrap_server', type=str, default="localhost:9092",
-                        help="Kafka bootstrap server(s) to use [default: %(default)s]")
+        help="Kafka bootstrap server(s) to use [default: %(default)s]")
     parser.add_argument("-q", "--queue", dest="queue", default="fc.crawled", required=False,
-                        help="Name of queue to inspect. [default: %(default)s]")
-    parser.add_argument("-l", "--limit", type=int, help="Optionally limit the maximum number of records to return [default: %(default)s]")
+         help="Name of queue to inspect [default: %(default)s]")
+    parser.add_argument("-l", "--limit", type=int, 
+        help="Optionally limit the maximum number of records to return [default: %(default)s]")
     parser.add_argument("-S", "--start-date", type=datetime.fromisoformat, 
-        help="The start date to stream from, in ISO format [default: %(default)s]", 
+        help="The start date to stream from, in ISO formats [default: %(default)s]", 
         default=(datetime.now(tz=timezone.utc) - timedelta(hours=2))
     )
     parser.add_argument("-E", "--end-date", type=datetime.fromisoformat, 
-        help="The end date to stream until, in ISO format [default: %(default)s]", 
+        help="The end date to stream until, in ISO formats [default: %(default)s]", 
         default=(datetime.now(tz=timezone.utc) - timedelta(seconds=1))
     )
 
@@ -189,7 +189,15 @@ def main(argv=None):
 
     c = 0
     for msg in generate_crawl_stream(from_date=args.start_date, to_date=args.end_date, topic=args.queue, broker=args.bootstrap_server, as_msg=True):
-        print(msg.value)
+        #json_line = json.loads(msg.value)
+        
+        #entry = CrawlLogEntry(msg)
+        #print(entry)
+        
+        msg_str = msg.value.decode('utf-8')
+        print(msg_str)
+        
+        # Count:
         c += 1
         if c >= args.limit:
             break
