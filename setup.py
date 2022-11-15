@@ -24,6 +24,7 @@ setup(
             'crawlstreams=crawlstreams.report:main',
             'analyse=crawlstreams.analysis:main',
             'launcher=crawlstreams.launcher:main',
+            'streamer=crawlstreams.streamer:main',
         ]
     }
 )
