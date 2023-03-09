@@ -1,18 +1,18 @@
 astroid==2.9.0
-certifi==2020.12.5
+certifi==2022.12.7
 chardet==4.0.0
 charset-normalizer==2.0.12
 idna==2.10
 isort==5.9.3
 kafka-python==1.4.7
-kevals @ git+https://github.com/ukwa/kevals.git@7a13dcc638ab163a97876bfb44f155e12720675b
+kevals @ git+https://github.com/ukwa/kevals.git@bd3bf52f0a75e0016df18bf0ba73762885b7b6ea
 lazy-object-proxy==1.6.0
 mccabe==0.6.1
 mmh3==2.5.1
 platformdirs==2.3.0
 pylint==2.12.2
 python-snappy==0.5.4
-requests==2.27.1
+requests==2.28.2
 toml==0.10.2
 typed-ast==1.4.3
 typing-extensions==3.10.0.2
