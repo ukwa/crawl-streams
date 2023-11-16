@@ -1,20 +1,10 @@
-astroid==2.9.0
-certifi==2022.12.7
-chardet==4.0.0
-charset-normalizer==2.0.12
-idna==2.10
-isort==5.9.3
-kafka-python==1.4.7
-kevals @ git+https://github.com/ukwa/kevals.git@8df8905d81dfe682f7764397b7cef927bb2ad5d4
-lazy-object-proxy==1.6.0
-mccabe==0.6.1
-mmh3==2.5.1
-platformdirs==2.3.0
-pylint==2.12.2
-python-snappy==0.5.4
-requests==2.30.0
-toml==0.10.2
-typed-ast==1.4.3
-typing-extensions==3.10.0.2
-urllib3==1.26.9
-wrapt==1.12.1
+certifi==2023.7.22
+charset-normalizer==3.3.2
+idna==3.4
+kafka-python==2.0.2
+kevals @ git+https://github.com/ukwa/kevals.git@cfbeef82365764c0b829c223859903097a8f421f
+mmh3==4.0.1
+python-snappy==0.6.1
+requests==2.31.0
+urlcanon==0.3.1
+urllib3==2.1.0
