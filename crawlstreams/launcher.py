@@ -162,8 +162,9 @@ class Launcher():
         # Is it the current hour?
         if now.hour is startDate.hour:
             logger.info(
-                "%s target %s (tid: %s) scheduled to crawl (now: %s, start: %s, end: %s), sending to FC-3-uris-to-crawl" % (
-                freq, t['title'], t['id'], now, startDate, endDate))
+                f"{freq} target {t['title']} (tid: {t['id']}) scheduled to crawl" 
+                f" (now: {now}, start: {startDate}, end: {endDate}), sending to queue '{self.queue}'"
+                )
             counter = 0
             for seed in t['seeds']:
                 # Assume all are true seeds, which will over-crawl where sites have aliases that are being treated as seeds.
